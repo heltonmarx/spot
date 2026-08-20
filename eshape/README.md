@@ -74,4 +74,4 @@ spatial relations (see the `eshape.Relation*` constants).
 
 Derived from the author's GeoShape contribution to `olivere/elastic` (PR #1058).
 Original code Copyright (c) Oliver Eilhard; adapter/packaging Copyright (c)
-Helton Marquez. MIT licensed.
+Helton Marques. MIT licensed.

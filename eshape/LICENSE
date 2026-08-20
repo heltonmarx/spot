@@ -4,7 +4,7 @@ Original GeoShape Query and GeoJSON shape types derived from
 https://github.com/olivere/elastic PR #1058 (Copyright (c) Oliver Eilhard
 and contributors).
 
-Adapter layer and packaging Copyright (c) 2019 Helton Marquez.
+Adapter layer and packaging Copyright (c) 2019 Helton Marques.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

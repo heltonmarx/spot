@@ -166,4 +166,4 @@ go test ./...
 
 The geometry types are derived from the author's [GeoShape Query contribution][pr]
 to `olivere/elastic` (PR #1058). Original code Copyright (c) Oliver Eilhard;
-packaging Copyright (c) Helton Marquez. Both are released under the MIT License.
+packaging Copyright (c) Helton Marques. Both are released under the MIT License.

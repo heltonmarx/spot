@@ -1,0 +1,77 @@
+version: "2"
+
+run:
+  tests: true
+
+linters:
+  default: none
+  enable:
+    # Correctness
+    - govet
+    - staticcheck
+    - unused
+    - errcheck
+    - errorlint
+    - nilerr
+    - forcetypeassert
+    - copyloopvar
+    - durationcheck
+    - reassign
+    # Style
+    - gocritic
+    - revive
+    - whitespace
+    - godot
+    - misspell
+    - dupword
+    - asciicheck
+    - errname
+    # Complexity
+    - gocyclo
+    - nestif
+    - funlen
+    - dupl
+    # Performance
+    - perfsprint
+    - unconvert
+    - ineffassign
+    - goconst
+    # Security
+    - gosec
+    - bidichk
+    - noctx
+    - containedctx
+    - fatcontext
+    # Logging
+    - sloglint
+    - loggercheck
+    # Testing
+    - thelper
+    - paralleltest
+    - testifylint
+    - usetesting
+    # Modernization
+    - modernize
+    - intrange
+    - usestdlibvars
+    - exhaustive
+    - nolintlint
+
+linters.settings:
+  errcheck:
+    check-type-assertions: true
+  funlen:
+    lines: 90
+    statements: 60
+  nolintlint:
+    require-explanation: true
+    require-specific: true
+
+formatters:
+  enable:
+    - gofmt
+    - gofumpt
+    - goimports
+
+issues:
+  max-same-issues: 0

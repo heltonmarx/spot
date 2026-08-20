@@ -1,0 +1,66 @@
+# spot
+
+> A Go library that models RFC 7946 GeoJSON geometry types as structs, with functional constructors, strict JSON round-tripping, and an Elasticsearch `geo_shape` query builder.
+
+## Overview
+
+`spot` represents RFC 7946 GeoJSON geometry types (Point, MultiPoint, LineString, MultiLineString, Polygon, MultiPolygon, GeometryCollection) as idiomatic Go structs, plus the Elasticsearch geo-shape extensions Envelope and Circle. Every type has a functional `NewXxx(...)` constructor and `MarshalJSON`/`UnmarshalJSON` with strict round-tripping.
+
+The top-level module is client-agnostic. A bundled subpackage, `github.com/heltonmarx/spot/eshape`, builds the Elasticsearch `geo_shape` query DSL on top of Elastic's official `go-elasticsearch` client.
+
+## Quick Start
+
+```sh
+go get github.com/heltonmarx/spot
+```
+
+```go
+import (
+	"encoding/json"
+	"fmt"
+
+	"github.com/heltonmarx/spot"
+)
+
+func main() {
+	s := spot.NewShape(spot.WithPoint([]float64{-122.42, 37.77}))
+	data, err := json.Marshal(s)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(data))
+	// {"coordinates":[-122.42,37.77],"type":"point"}
+}
+```
+
+## Key Concepts
+
+- Discriminated `Shape` container: a `Type` field plus a single concrete geometry pointer, so any geometry can be held in one value.
+- Strict RFC 7946 coordinate ordering: longitude first, then latitude.
+- Client-agnostic top-level module (`github.com/heltonmarx/spot`); the `eshape` subpackage depends on `go-elasticsearch`.
+
+## API Reference
+
+- Core types: `Shape`, `Point`, `LineString`, `Polygon`, `GeometryCollection`, `Circle`, `Envelope` (and the remaining RFC 7946 types `MultiPoint`, `MultiLineString`, `MultiPolygon`).
+- `NewShape(...Option)` builds a `Shape`; `NewXxx(...)` constructors build each geometry.
+- `eshape.GeoShapeQuery` builds the Elasticsearch `geo_shape` query DSL.
+
+## Common Patterns
+
+Build a shape, then marshal it:
+
+```go
+s := spot.NewShape(spot.WithPoint([]float64{-122.42, 37.77}))
+data, err := json.Marshal(s) // and json.Unmarshal to round-trip
+```
+
+## Error Handling
+
+- `UnmarshalJSON` returns an error when it encounters an unknown geometry type.
+- `MarshalJSON` and serialization helpers return errors that must be handled by the caller.
+
+## References
+
+- Repository: https://github.com/heltonmarx/spot
+- Package docs: https://pkg.go.dev/github.com/heltonmarx/spot
+- Issues: https://github.com/heltonmarx/spot/issues

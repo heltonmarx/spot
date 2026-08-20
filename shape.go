@@ -134,26 +134,54 @@ func (m *Shape) decode(raw *rawGeometry) error {
 	if err != nil {
 		return err
 	}
-	m.Type = raw.Type
-	switch v := geom.(type) {
-	case *Point:
-		m.Point = v
-	case *MultiPoint:
-		m.MultiPoint = v
-	case *LineString:
-		m.LineString = v
-	case *MultiLineString:
-		m.MultiLineString = v
-	case *Polygon:
-		m.Polygon = v
-	case *MultiPolygon:
-		m.MultiPolygon = v
-	case *GeometryCollection:
-		m.GeometryCollection = v
-	case *Envelope:
-		m.Envelope = v
-	case *Circle:
-		m.Circle = v
-	}
+	m.Type = assignToShape(m, geom)
 	return nil
+}
+
+// assignToShape stores g in the Shape field matching its concrete type, clears
+// any geometry previously held by the shape, and returns the geometry type
+// name. It is the single mapping from a concrete geometry to its Shape field,
+// shared by Shape.UnmarshalJSON and the NewShape options where reusing a Shape
+// must not leave stale fields behind.
+func assignToShape(s *Shape, g any) string {
+	s.Point = nil
+	s.MultiPoint = nil
+	s.LineString = nil
+	s.MultiLineString = nil
+	s.Polygon = nil
+	s.MultiPolygon = nil
+	s.GeometryCollection = nil
+	s.Envelope = nil
+	s.Circle = nil
+
+	switch v := g.(type) {
+	case *Point:
+		s.Point = v
+		return TypePoint
+	case *MultiPoint:
+		s.MultiPoint = v
+		return TypeMultiPoint
+	case *LineString:
+		s.LineString = v
+		return TypeLineString
+	case *MultiLineString:
+		s.MultiLineString = v
+		return TypeMultiLineString
+	case *Polygon:
+		s.Polygon = v
+		return TypePolygon
+	case *MultiPolygon:
+		s.MultiPolygon = v
+		return TypeMultiPolygon
+	case *GeometryCollection:
+		s.GeometryCollection = v
+		return TypeGeometryCollection
+	case *Envelope:
+		s.Envelope = v
+		return TypeEnvelope
+	case *Circle:
+		s.Circle = v
+		return TypeCircle
+	}
+	return ""
 }

@@ -129,3 +129,45 @@ func TestGeometryRoundTrip(t *testing.T) {
 		})
 	}
 }
+
+func TestGeometryUnmarshalInvalidJSON(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name   string
+		target any
+	}{
+		{name: "point", target: &Point{}},
+		{name: "multipoint", target: &MultiPoint{}},
+		{name: "linestring", target: &LineString{}},
+		{name: "multilinestring", target: &MultiLineString{}},
+		{name: "polygon", target: &Polygon{}},
+		{name: "multipolygon", target: &MultiPolygon{}},
+		{name: "geometrycollection", target: &GeometryCollection{}},
+		{name: "envelope", target: &Envelope{}},
+		{name: "circle", target: &Circle{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			err := json.Unmarshal([]byte(`{"type":"point","coordinates":`), tt.target)
+			require.Error(t, err)
+		})
+	}
+}
+
+func TestGeometryUnmarshalCoordinateTypeMismatch(t *testing.T) {
+	t.Parallel()
+	// A point whose "coordinates" carry an object instead of an array must
+	// fail to decode rather than silently producing an empty or partial value.
+	point := &Point{}
+	err := json.Unmarshal([]byte(`{"type":"point","coordinates":{"x":1,"y":2}}`), point)
+	require.Error(t, err)
+}
+
+func TestGeometryCollectionUnknownMember(t *testing.T) {
+	t.Parallel()
+	collection := &GeometryCollection{}
+	err := json.Unmarshal([]byte(`{"type":"geometrycollection","geometries":[{"type":"teapot"}]}`), collection)
+	require.Error(t, err)
+}

@@ -6,8 +6,8 @@ GeoJSON geometry types for Elasticsearch geo-shape matching, extracted from the
 author's [GeoShape Query implementation][pr] for `olivere/elastic` and repackaged
 as a standalone, client-agnostic Go module.
 
-This module models all **nine GeoJSON geometry types** as first-class Go structs,
-with strict RFC 7946 round-tripping (Marshal/Unmarshal) — `Point`, `MultiPoint`,
+This module models all nine GeoJSON geometry types as first-class Go structs,
+with strict RFC 7946 round-tripping (Marshal/Unmarshal): `Point`, `MultiPoint`,
 `LineString`, `MultiLineString`, `Polygon`, `MultiPolygon`, `GeometryCollection`,
 `Envelope`, and `Circle`.
 
@@ -15,8 +15,8 @@ It has **no dependency** on any Elasticsearch client, so it can be reused by the
 fluent `olivere/elastic` client, Elastic's official `go-elasticsearch` client, or
 any other consumer that needs to serialize a geo shape into JSON.
 
-This single repository also bundles the official-client **GeoShape query adapter**
-in the [`eshape`][eshape] subpackage — it depends on `go-elasticsearch`, so it is
+This single repository also bundles the official-client GeoShape query adapter
+in the [`eshape`][eshape] subpackage. It depends on `go-elasticsearch`, so it is
 only pulled into builds of code that imports it.
 
 [pr]: https://github.com/olivere/elastic/pull/1058
@@ -33,7 +33,7 @@ go get github.com/heltonmarx/spot
 ### Build a shape and serialize the `geo_shape` query DSL
 
 Build a shape with the functional `NewShape(...Option)` API, then marshal it to
-the GeoJSON ES expects inside a `geo_shape` query — `spot` is client-agnostic, so
+the GeoJSON ES expects inside a `geo_shape` query. `spot` is client-agnostic, so
 this works with any ES client:
 
 ```go
@@ -132,8 +132,8 @@ func main() {
 }
 ```
 
-> The `eshape` subpackage only pulls in `go-elasticsearch` when you import it —
-> using `spot` alone for shape serialization adds no ES dependency to your build.
+> The `eshape` subpackage only pulls in `go-elasticsearch` when you import it.
+> Using `spot` alone for shape serialization adds no ES dependency to your build.
 
 ## Supported geometry types
 

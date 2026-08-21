@@ -1,4 +1,4 @@
-# eshape — GeoShape Query adapter for the official Go client
+# eshape: GeoShape Query adapter for the official Go client
 
 The `eshape` subpackage ports the [GeoShape Query][pr] (originally for the fluent
 `olivere/elastic` client) onto Elastic's **official Go client**
@@ -11,11 +11,11 @@ with the official client's raw / low-level API.
 ## Why adapter + core split
 
 `olivere/elastic` is a high-level builder-style client; `go-elasticsearch` is
-low-level with a generated typed DSL. Rather than fight the generator, this package
-keeps the reusable, hard part — the GeoJSON modeling and RFC 7946 compliance — in
-the `spot` package, and glues it into the official client via its ability to accept
-arbitrary JSON bodies. That's the pragmatic way geo-shape queries are sent through
-the low-level client in production.
+low-level with a generated typed DSL. Rather than fight the generator, this
+package keeps the reusable part, the GeoJSON modeling and [RFC 7946](https://datatracker.ietf.org/doc/html/rfc7946)
+compliance, in the `spot` package. It glues that into the official client, which
+accepts arbitrary JSON bodies. Geo-shape queries are usually sent through the
+low-level client this way in production.
 
 ## Usage
 

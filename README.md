@@ -1,5 +1,7 @@
 # spot
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/heltonmarx/spot.svg)](https://pkg.go.dev/github.com/heltonmarx/spot)
+
 GeoJSON geometry types for Elasticsearch geo-shape matching, extracted from the
 author's [GeoShape Query implementation][pr] for `olivere/elastic` and repackaged
 as a standalone, client-agnostic Go module.

@@ -5,32 +5,27 @@ package spot
 // ones.
 type Option func(*Shape)
 
-// applyOption applies geometry to s: it records the geometry's type and stores
-// it in the field matching its concrete type, clearing any geometry previously
-// held by the shape. Later options therefore overwrite the geometry set by
-// earlier ones.
-func applyOption(s *Shape, g any) {
-	s.Type = assignToShape(s, g)
-}
-
 // WithPoint sets the Shape to a Point with the given [lon, lat] coordinates.
 func WithPoint(coordinates []float64) Option {
 	return func(s *Shape) {
-		applyOption(s, NewPoint(coordinates))
+		s.Type = TypePoint
+		s.Point = NewPoint(coordinates)
 	}
 }
 
 // WithMultiPoint sets the Shape to a MultiPoint holding each [lon, lat] position.
 func WithMultiPoint(coordinates [][]float64) Option {
 	return func(s *Shape) {
-		applyOption(s, NewMultiPoint(coordinates))
+		s.Type = TypeMultiPoint
+		s.MultiPoint = NewMultiPoint(coordinates)
 	}
 }
 
 // WithLineString sets the Shape to a LineString made of [lon, lat] positions.
 func WithLineString(coordinates [][]float64) Option {
 	return func(s *Shape) {
-		applyOption(s, NewLineString(coordinates))
+		s.Type = TypeLineString
+		s.LineString = NewLineString(coordinates)
 	}
 }
 
@@ -38,7 +33,8 @@ func WithLineString(coordinates [][]float64) Option {
 // position array per line.
 func WithMultiLineString(coordinates [][][]float64) Option {
 	return func(s *Shape) {
-		applyOption(s, NewMultiLineString(coordinates))
+		s.Type = TypeMultiLineString
+		s.MultiLineString = NewMultiLineString(coordinates)
 	}
 }
 
@@ -47,7 +43,8 @@ func WithMultiLineString(coordinates [][][]float64) Option {
 // sequence of [lon, lat] positions.
 func WithPolygon(coordinates [][][]float64) Option {
 	return func(s *Shape) {
-		applyOption(s, NewPolygon(coordinates))
+		s.Type = TypePolygon
+		s.Polygon = NewPolygon(coordinates)
 	}
 }
 
@@ -55,7 +52,8 @@ func WithPolygon(coordinates [][][]float64) Option {
 // element.
 func WithMultiPolygon(coordinates [][][][]float64) Option {
 	return func(s *Shape) {
-		applyOption(s, NewMultiPolygon(coordinates))
+		s.Type = TypeMultiPolygon
+		s.MultiPolygon = NewMultiPolygon(coordinates)
 	}
 }
 
@@ -63,14 +61,16 @@ func WithMultiPolygon(coordinates [][][][]float64) Option {
 // decoded geometries.
 func WithGeometryCollection(geometries []any) Option {
 	return func(s *Shape) {
-		applyOption(s, NewGeometryCollection(geometries))
+		s.Type = TypeGeometryCollection
+		s.GeometryCollection = NewGeometryCollection(geometries)
 	}
 }
 
 // WithEnvelope sets the Shape to an Envelope from its two corner coordinates.
 func WithEnvelope(coordinates [][]float64) Option {
 	return func(s *Shape) {
-		applyOption(s, NewEnvelope(coordinates))
+		s.Type = TypeEnvelope
+		s.Envelope = NewEnvelope(coordinates)
 	}
 }
 
@@ -78,6 +78,7 @@ func WithEnvelope(coordinates [][]float64) Option {
 // coordinates. radius defaults to meters unless it carries a unit suffix.
 func WithCircle(radius string, coordinates []float64) Option {
 	return func(s *Shape) {
-		applyOption(s, NewCircle(radius, coordinates))
+		s.Type = TypeCircle
+		s.Circle = NewCircle(radius, coordinates)
 	}
 }

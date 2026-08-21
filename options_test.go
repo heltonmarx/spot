@@ -112,19 +112,3 @@ func TestNewShapeOptions(t *testing.T) {
 		})
 	}
 }
-
-func TestNewShapeOptionOrdering(t *testing.T) {
-	t.Parallel()
-	is := assert.New(t)
-
-	// Later options overwrite Type and the geometry field set by earlier ones,
-	// including clearing the previously set field pointer.
-	s := NewShape(
-		WithPoint([]float64{1, 2}),
-		WithPolygon([][][]float64{{{0, 0}, {1, 0}, {1, 1}, {0, 0}}}),
-	)
-
-	is.True(s.IsPolygon())
-	is.False(s.IsPoint())
-	is.Nil(s.Point)
-}

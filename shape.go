@@ -130,58 +130,64 @@ func (m *Shape) MarshalJSON() ([]byte, error) {
 }
 
 func (m *Shape) decode(raw *rawGeometry) error {
-	geom, err := decodeGeometry(raw)
-	if err != nil {
-		return err
+	m.Type = raw.Type
+	switch raw.Type {
+	case TypePoint:
+		point := &Point{}
+		if err := point.decode(raw); err != nil {
+			return err
+		}
+		m.Point = point
+	case TypeMultiPoint:
+		multipoint := &MultiPoint{}
+		if err := multipoint.decode(raw); err != nil {
+			return err
+		}
+		m.MultiPoint = multipoint
+	case TypeLineString:
+		lineString := &LineString{}
+		if err := lineString.decode(raw); err != nil {
+			return err
+		}
+		m.LineString = lineString
+	case TypeMultiLineString:
+		multiLine := &MultiLineString{}
+		if err := multiLine.decode(raw); err != nil {
+			return err
+		}
+		m.MultiLineString = multiLine
+	case TypePolygon:
+		polygon := &Polygon{}
+		if err := polygon.decode(raw); err != nil {
+			return err
+		}
+		m.Polygon = polygon
+	case TypeMultiPolygon:
+		multiPolygon := &MultiPolygon{}
+		if err := multiPolygon.decode(raw); err != nil {
+			return err
+		}
+		m.MultiPolygon = multiPolygon
+	case TypeGeometryCollection:
+		geometryCollection := &GeometryCollection{}
+		if err := geometryCollection.decode(raw); err != nil {
+			return err
+		}
+		m.GeometryCollection = geometryCollection
+	case TypeEnvelope:
+		envelope := &Envelope{}
+		if err := envelope.decode(raw); err != nil {
+			return err
+		}
+		m.Envelope = envelope
+	case TypeCircle:
+		circle := &Circle{}
+		if err := circle.decode(raw); err != nil {
+			return err
+		}
+		m.Circle = circle
+	default:
+		return fmt.Errorf("geo: unknown type `%s`", m.Type)
 	}
-	m.Type = assignToShape(m, geom)
 	return nil
-}
-
-// assignToShape stores g in the Shape field matching its concrete type, clears
-// any geometry previously held by the shape, and returns the geometry type
-// name. It is the single mapping from a concrete geometry to its Shape field,
-// shared by Shape.UnmarshalJSON and the NewShape options where reusing a Shape
-// must not leave stale fields behind.
-func assignToShape(s *Shape, g any) string {
-	s.Point = nil
-	s.MultiPoint = nil
-	s.LineString = nil
-	s.MultiLineString = nil
-	s.Polygon = nil
-	s.MultiPolygon = nil
-	s.GeometryCollection = nil
-	s.Envelope = nil
-	s.Circle = nil
-
-	switch v := g.(type) {
-	case *Point:
-		s.Point = v
-		return TypePoint
-	case *MultiPoint:
-		s.MultiPoint = v
-		return TypeMultiPoint
-	case *LineString:
-		s.LineString = v
-		return TypeLineString
-	case *MultiLineString:
-		s.MultiLineString = v
-		return TypeMultiLineString
-	case *Polygon:
-		s.Polygon = v
-		return TypePolygon
-	case *MultiPolygon:
-		s.MultiPolygon = v
-		return TypeMultiPolygon
-	case *GeometryCollection:
-		s.GeometryCollection = v
-		return TypeGeometryCollection
-	case *Envelope:
-		s.Envelope = v
-		return TypeEnvelope
-	case *Circle:
-		s.Circle = v
-		return TypeCircle
-	}
-	return ""
 }

@@ -10,12 +10,20 @@ type Envelope struct {
 }
 
 // NewEnvelope returns an Envelope from its two corner coordinates.
+// Panics if exactly two corner positions are not provided.
 func NewEnvelope(coordinates [][]float64) *Envelope {
+	if len(coordinates) != 2 {
+		panic("spot: Envelope requires exactly 2 corner positions [[lon,lat],[lon,lat]]")
+	}
 	return &Envelope{
 		Type:        TypeEnvelope,
 		Coordinates: coordinates,
 	}
 }
+
+// GeoType returns the geometry type constant for Envelope.
+func (m *Envelope) GeoType() string { return TypeEnvelope }
+func (m *Envelope) isGeometry()     {}
 
 // UnmarshalJSON decodes an envelope geometry into m.
 func (m *Envelope) UnmarshalJSON(data []byte) error {

@@ -174,7 +174,7 @@ func TestShapeMarshalRoundTripForAllTypes(t *testing.T) {
 		},
 		{
 			name:     "geometrycollection",
-			shape:    NewShape(WithGeometryCollection([]any{NewPoint([]float64{1, 2})})),
+			shape:    NewShape(WithGeometryCollection([]Geometry{NewPoint([]float64{1, 2})})),
 			expected: `{"type":"geometrycollection","geometries":[{"type":"point","coordinates":[1,2]}]}`,
 		},
 		{

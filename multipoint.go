@@ -16,6 +16,10 @@ func NewMultiPoint(coordinates [][]float64) *MultiPoint {
 	}
 }
 
+// GeoType returns the geometry type constant for MultiPoint.
+func (m *MultiPoint) GeoType() string { return TypeMultiPoint }
+func (m *MultiPoint) isGeometry()     {}
+
 // UnmarshalJSON decodes a GeoJSON multipoint into m.
 func (m *MultiPoint) UnmarshalJSON(data []byte) error {
 	raw := &rawGeometry{}

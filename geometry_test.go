@@ -77,7 +77,7 @@ func TestGeometryRoundTrip(t *testing.T) {
 		},
 		{
 			name: "geometry collection",
-			expected: NewGeometryCollection([]any{
+			expected: NewGeometryCollection([]Geometry{
 				&Point{Type: TypePoint, Coordinates: []float64{100.0, 0.0}},
 				&LineString{Type: TypeLineString, Coordinates: [][]float64{{101.0, 0.0}, {102.0, 1.0}}},
 			}),

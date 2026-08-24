@@ -17,6 +17,10 @@ func NewMultiLineString(coordinates [][][]float64) *MultiLineString {
 	}
 }
 
+// GeoType returns the geometry type constant for MultiLineString.
+func (m *MultiLineString) GeoType() string { return TypeMultiLineString }
+func (m *MultiLineString) isGeometry()     {}
+
 // UnmarshalJSON decodes a GeoJSON multilinestring into m.
 func (m *MultiLineString) UnmarshalJSON(data []byte) error {
 	raw := &rawGeometry{}

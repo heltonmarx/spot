@@ -16,6 +16,10 @@ func NewMultiPolygon(coordinates [][][][]float64) *MultiPolygon {
 	}
 }
 
+// GeoType returns the geometry type constant for MultiPolygon.
+func (m *MultiPolygon) GeoType() string { return TypeMultiPolygon }
+func (m *MultiPolygon) isGeometry()     {}
+
 // UnmarshalJSON decodes a GeoJSON multipolygon into m.
 func (m *MultiPolygon) UnmarshalJSON(data []byte) error {
 	raw := &rawGeometry{}

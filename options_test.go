@@ -78,11 +78,11 @@ func TestNewShapeOptions(t *testing.T) {
 		},
 		{
 			name: "with geometry collection",
-			opts: []Option{WithGeometryCollection([]any{NewPoint([]float64{100.0, 0.0})})},
+			opts: []Option{WithGeometryCollection([]Geometry{NewPoint([]float64{100.0, 0.0})})},
 			check: func(t *testing.T, s *Shape) {
 				is := assert.New(t)
 				is.True(s.IsGeometryCollection())
-				is.Equal(NewGeometryCollection([]any{NewPoint([]float64{100.0, 0.0})}), s.GeometryCollection)
+				is.Equal(NewGeometryCollection([]Geometry{NewPoint([]float64{100.0, 0.0})}), s.GeometryCollection)
 			},
 		},
 		{

@@ -59,7 +59,7 @@ func WithMultiPolygon(coordinates [][][][]float64) Option {
 
 // WithGeometryCollection sets the Shape to a GeometryCollection of the given
 // decoded geometries.
-func WithGeometryCollection(geometries []any) Option {
+func WithGeometryCollection(geometries []Geometry) Option {
 	return func(s *Shape) {
 		s.Type = TypeGeometryCollection
 		s.GeometryCollection = NewGeometryCollection(geometries)

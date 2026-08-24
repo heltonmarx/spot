@@ -130,64 +130,30 @@ func (m *Shape) MarshalJSON() ([]byte, error) {
 }
 
 func (m *Shape) decode(raw *rawGeometry) error {
+	geom, err := decodeGeometry(raw)
+	if err != nil {
+		return err
+	}
 	m.Type = raw.Type
-	switch raw.Type {
-	case TypePoint:
-		point := &Point{}
-		if err := point.decode(raw); err != nil {
-			return err
-		}
-		m.Point = point
-	case TypeMultiPoint:
-		multipoint := &MultiPoint{}
-		if err := multipoint.decode(raw); err != nil {
-			return err
-		}
-		m.MultiPoint = multipoint
-	case TypeLineString:
-		lineString := &LineString{}
-		if err := lineString.decode(raw); err != nil {
-			return err
-		}
-		m.LineString = lineString
-	case TypeMultiLineString:
-		multiLine := &MultiLineString{}
-		if err := multiLine.decode(raw); err != nil {
-			return err
-		}
-		m.MultiLineString = multiLine
-	case TypePolygon:
-		polygon := &Polygon{}
-		if err := polygon.decode(raw); err != nil {
-			return err
-		}
-		m.Polygon = polygon
-	case TypeMultiPolygon:
-		multiPolygon := &MultiPolygon{}
-		if err := multiPolygon.decode(raw); err != nil {
-			return err
-		}
-		m.MultiPolygon = multiPolygon
-	case TypeGeometryCollection:
-		geometryCollection := &GeometryCollection{}
-		if err := geometryCollection.decode(raw); err != nil {
-			return err
-		}
-		m.GeometryCollection = geometryCollection
-	case TypeEnvelope:
-		envelope := &Envelope{}
-		if err := envelope.decode(raw); err != nil {
-			return err
-		}
-		m.Envelope = envelope
-	case TypeCircle:
-		circle := &Circle{}
-		if err := circle.decode(raw); err != nil {
-			return err
-		}
-		m.Circle = circle
-	default:
-		return fmt.Errorf("geo: unknown type `%s`", m.Type)
+	switch g := geom.(type) {
+	case *Point:
+		m.Point = g
+	case *MultiPoint:
+		m.MultiPoint = g
+	case *LineString:
+		m.LineString = g
+	case *MultiLineString:
+		m.MultiLineString = g
+	case *Polygon:
+		m.Polygon = g
+	case *MultiPolygon:
+		m.MultiPolygon = g
+	case *GeometryCollection:
+		m.GeometryCollection = g
+	case *Envelope:
+		m.Envelope = g
+	case *Circle:
+		m.Circle = g
 	}
 	return nil
 }

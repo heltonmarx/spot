@@ -3,10 +3,8 @@ package spot_test
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 
 	"github.com/heltonmarx/spot"
-	"github.com/heltonmarx/spot/eshape"
 )
 
 func Example_buildPointShape() {
@@ -38,21 +36,16 @@ func Example_buildPolygonShape() {
 	// Output: {"type":"polygon","coordinates":[[[13.4,52.5],[14.4,52.5],[14.4,53.5],[13.4,52.5]]]}
 }
 
-func ExampleGeoShapeQuery() {
+func Example_geoShapeQueryDSL() {
 	shape := spot.NewShape(spot.WithPoint([]float64{13.4, 52.5}))
 
-	query := eshape.NewGeoShapeQuery("location").
-		Shape(shape).
-		Relation(eshape.RelationWithin)
+	shapeBytes, err := json.Marshal(shape)
+	if err != nil {
+		panic(err)
+	}
 
-	body, err := query.Body()
-	if err != nil {
-		panic(err)
-	}
-	data, err := io.ReadAll(body)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(data))
-	// Output: {"geo_shape":{"location":{"relation":"within","shape":{"type":"point","coordinates":[13.4,52.5]}}}}
+	// shapeBytes is a json.RawMessage-compatible value, ready for
+	// types.GeoShapeFieldQuery{Shape: shapeBytes} from go-elasticsearch/v8.
+	fmt.Println(string(shapeBytes))
+	// Output: {"type":"point","coordinates":[13.4,52.5]}
 }

@@ -6,21 +6,20 @@ GeoJSON geometry types for Elasticsearch geo-shape matching, extracted from the
 author's [GeoShape Query implementation][pr] for `olivere/elastic` and repackaged
 as a standalone, client-agnostic Go module.
 
-This module models all nine GeoJSON geometry types as first-class Go structs,
-with strict RFC 7946 round-tripping (Marshal/Unmarshal): `Point`, `MultiPoint`,
-`LineString`, `MultiLineString`, `Polygon`, `MultiPolygon`, `GeometryCollection`,
-`Envelope`, and `Circle`.
+This module models all nine geometry types as first-class Go structs with
+typed marshal/unmarshal: `Point`, `MultiPoint`, `LineString`, `MultiLineString`,
+`Polygon`, `MultiPolygon`, `GeometryCollection`, `Envelope`, and `Circle`.
 
-It has **no dependency** on any Elasticsearch client, so it can be reused by the
-fluent `olivere/elastic` client, Elastic's official `go-elasticsearch` client, or
-any other consumer that needs to serialize a geo shape into JSON.
+All types implement the `Geometry` interface (`GeoType() string`), so a
+`GeometryCollection` carries `[]Geometry` rather than `[]any`.
 
-This single repository also bundles the official-client GeoShape query adapter
-in the [`eshape`][eshape] subpackage. It depends on `go-elasticsearch`, so it is
-only pulled into builds of code that imports it.
+> **Type name casing:** this library uses lowercase type names (e.g. `"point"`,
+> `"polygon"`) as required by Elasticsearch. This differs from RFC 7946, which
+> specifies PascalCase (`"Point"`, `"Polygon"`).
+
+This module has **no runtime dependency** on any Elasticsearch client.
 
 [pr]: https://github.com/olivere/elastic/pull/1058
-[eshape]: ./eshape
 
 ## Install
 
@@ -30,114 +29,130 @@ go get github.com/heltonmarx/spot
 
 ## Usage
 
-### Build a shape and serialize the `geo_shape` query DSL
+### 1. Indexing a document with a geo_shape field
 
-Build a shape with the functional `NewShape(...Option)` API, then marshal it to
-the GeoJSON ES expects inside a `geo_shape` query. `spot` is client-agnostic, so
-this works with any ES client:
+When you index a document, Elasticsearch expects a GeoJSON geometry object for
+any `geo_shape` mapped field. `spot` gives you typed constructors instead of
+hand-assembled `map[string]any`:
 
 ```go
-package main
+doc := map[string]any{
+    "name": "Central Park",
+    "location": spot.NewPolygon([][][]float64{
+        {
+            {-73.98, 40.77}, {-73.95, 40.77},
+            {-73.95, 40.76}, {-73.98, 40.76},
+            {-73.98, 40.77},
+        },
+    }),
+}
 
+body, _ := json.Marshal(doc)
+es.Index("places", strings.NewReader(string(body)))
+```
+
+### 2. Geo-shape queries
+
+Find documents whose shape intersects, contains, or is within a query shape.
+Marshal a `spot.Shape` into `GeoShapeFieldQuery.Shape` from the official client:
+
+```go
 import (
-	"encoding/json"
-	"fmt"
+    "context"
+    "encoding/json"
 
-	"github.com/heltonmarx/spot"
+    elasticsearch "github.com/elastic/go-elasticsearch/v8"
+    estypes "github.com/elastic/go-elasticsearch/v8/typedapi/types"
+    "github.com/elastic/go-elasticsearch/v8/typedapi/types/enums/geoshaperelation"
+    "github.com/heltonmarx/spot"
 )
 
-func main() {
-	// Point shape (lon, lat order per GeoJSON)
-	shape := spot.NewShape(spot.WithPoint([]float64{13.400544, 52.530286}))
+func search(es *elasticsearch.TypedClient) {
+    shapeBytes, _ := json.Marshal(spot.NewShape(spot.WithEnvelope([][]float64{
+        {-74.1, 40.9}, {-73.9, 40.7},
+    })))
 
-	// Or a polygon (closed ring: first and last vertex match)
-	// shape := spot.NewShape(spot.WithPolygon([][][]float64{
-	//     {{100.0, 0.0}, {101.0, 0.0}, {101.0, 1.0}, {100.0, 1.0}, {100.0, 0.0}},
-	// }))
+    q := estypes.NewGeoShapeQuery()
+    q.GeoShapeQuery["location"] = estypes.GeoShapeFieldQuery{
+        Shape:    shapeBytes,
+        Relation: &geoshaperelation.Intersects,
+    }
 
-	// And a circle with a radius
-	// shape := spot.NewShape(spot.WithCircle("25m", []float64{-109.874838, 44.439550}))
-
-	// Any client can serialize it into the query body:
-	body, _ := json.Marshal(map[string]any{
-		"query": map[string]any{
-			"geo_shape": map[string]any{
-				"location": map[string]any{
-					"shape":    shape,
-					"relation": "within",
-				},
-			},
-		},
-	})
-	fmt.Println(string(body))
+    es.Search().Index("places").
+        Request(&estypes.SearchRequest{
+            Query: &estypes.Query{GeoShape: q},
+        }).
+        Do(context.Background())
 }
 ```
 
-The example above emits the exact ES `geo_shape` query DSL, e.g.:
+Spatial relations map to real questions:
 
-```json
-{"query":{"geo_shape":{"location":{"shape":{"type":"point","coordinates":[13.400544,52.530286]},"relation":"within"}}}}
-```
+| Relation | Meaning |
+|---|---|
+| `intersects` | shapes overlap at all (default) |
+| `within` | document shape is fully inside the query shape |
+| `contains` | document shape fully encloses the query shape |
+| `disjoint` | shapes have no overlap |
 
-### Search Elasticsearch through the official client
+### 3. Parsing shapes from Elasticsearch responses
 
-For a full end-to-end search, the bundled [`eshape`][eshape] subpackage builds the
-`geo_shape` query on top of Elastic's official `go-elasticsearch` client, so you
-can run a real query without hand-assembling the JSON:
+When reading a document back from ES, the `location` field arrives as raw
+GeoJSON. `Shape.UnmarshalJSON` dispatches to the correct concrete type
+automatically (no manual type-switching required):
 
 ```go
-package main
+var shape spot.Shape
+json.Unmarshal(hit["location"], &shape)
 
-import (
-	"context"
-	"fmt"
-
-	elasticsearch "github.com/elastic/go-elasticsearch/v8"
-	"github.com/heltonmarx/spot"
-	"github.com/heltonmarx/spot/eshape"
-)
-
-func main() {
-	es, err := elasticsearch.NewDefaultClient()
-	if err != nil {
-		panic(err)
-	}
-
-	// A polygon bounding a region (closed ring, lon/lat order).
-	shape := spot.NewShape(spot.WithPolygon([][][]float64{
-		{{-74.1, 40.7}, {-73.9, 40.7}, {-73.9, 40.9}, {-74.1, 40.7}},
-	}))
-
-	// Build the geo_shape query body against the "location" field.
-	body, err := eshape.NewGeoShapeQuery("location").
-		Shape(shape).
-		Relation(eshape.RelationIntersects).
-		Body()
-	if err != nil {
-		panic(err)
-	}
-
-	// Send it through the official client's low-level Search API.
-	res, err := es.Search(
-		es.Search.WithContext(context.Background()),
-		es.Search.WithIndex("places"),
-		es.Search.WithBody(body),
-	)
-	if err != nil {
-		panic(err)
-	}
-	defer res.Body.Close()
-
-	fmt.Println(res.Status())
+switch {
+case shape.IsPolygon():
+    rings := shape.Polygon.Coordinates
+    // ...
+case shape.IsPoint():
+    lon, lat := shape.Point.Coordinates[0], shape.Point.Coordinates[1]
+    // ...
 }
 ```
 
-> The `eshape` subpackage only pulls in `go-elasticsearch` when you import it.
-> Using `spot` alone for shape serialization adds no ES dependency to your build.
+### 4. GeometryCollection for mixed-type fields
+
+Elasticsearch supports indexing a `geometrycollection`, for example a venue
+that has both a polygon boundary and a point entrance. `GeometryCollection`
+carries `[]Geometry`, so you can build and inspect collections without type
+assertions:
+
+```go
+collection := spot.NewGeometryCollection([]spot.Geometry{
+    spot.NewPoint([]float64{-73.98, 40.76}),
+    spot.NewPolygon([][][]float64{
+        {
+            {-73.99, 40.77}, {-73.97, 40.77},
+            {-73.97, 40.75}, {-73.99, 40.75},
+            {-73.99, 40.77},
+        },
+    }),
+})
+```
+
+### 5. Envelope and Circle for bounding-box and radius queries
+
+`Envelope` (top-left + bottom-right corners) and `Circle` (center + radius)
+are Elasticsearch extensions not in standard GeoJSON. They are the most
+efficient shapes for bounding-box and proximity queries:
+
+```go
+// Bounding box: upper-left corner first, lower-right second.
+envelope := spot.NewShape(spot.WithEnvelope([][]float64{
+    {-74.1, 40.9},
+    {-73.9, 40.7},
+}))
+
+// Circle: radius defaults to meters when no unit suffix is given.
+circle := spot.NewShape(spot.WithCircle("5km", []float64{-73.98, 40.76}))
+```
 
 ## Supported geometry types
-
-All constants are exported on the package:
 
 | `Type` constant | `Shape` helper | GeoJSON object |
 |---|---|---|
@@ -148,17 +163,14 @@ All constants are exported on the package:
 | `TypePolygon` | `WithPolygon` | polygon |
 | `TypeMultiPolygon` | `WithMultiPolygon` | multipolygon |
 | `TypeGeometryCollection` | `WithGeometryCollection` | geometrycollection |
-| `TypeEnvelope` | `WithEnvelope` | envelope |
-| `TypeCircle` | `WithCircle` | circle |
+| `TypeEnvelope` | `WithEnvelope` | envelope (ES extension) |
+| `TypeCircle` | `WithCircle` | circle (ES extension) |
 
-`Shape` also exposes `IsPoint()`, `IsPolygon()`, … predicates and a
+`Shape` also exposes `IsPoint()`, `IsPolygon()`, ... predicates and a
 discriminated `MarshalJSON`/`UnmarshalJSON`, so a heterogeneous `Shape` can be
 round-tripped without knowing its concrete type.
 
 ## Tests
-
-Test fixtures are taken verbatim from **RFC 7946** (the GeoJSON specification),
-each exercised for both marshal and unmarshal round-trips.
 
 ```sh
 go test ./...

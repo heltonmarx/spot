@@ -18,6 +18,10 @@ func NewPolygon(coordinates [][][]float64) *Polygon {
 	}
 }
 
+// GeoType returns the geometry type constant for Polygon.
+func (m *Polygon) GeoType() string { return TypePolygon }
+func (m *Polygon) isGeometry()     {}
+
 // UnmarshalJSON decodes a GeoJSON polygon into m.
 func (m *Polygon) UnmarshalJSON(data []byte) error {
 	raw := &rawGeometry{}

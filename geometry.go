@@ -53,6 +53,17 @@ type rawGeometryDecoder interface {
 	decode(*rawGeometry) error
 }
 
+// unmarshalGeometry is the shared body for every concrete geometry's
+// UnmarshalJSON: it allocates a rawGeometry, unmarshals into it, then calls
+// the type's own decode method.
+func unmarshalGeometry(data []byte, g rawGeometryDecoder) error {
+	raw := &rawGeometry{}
+	if err := json.Unmarshal(data, raw); err != nil {
+		return err
+	}
+	return g.decode(raw)
+}
+
 // decoded decodes raw into g and returns g. It factors out the identical
 // construct-then-decode pattern shared by every case of decodeGeometry.
 func decoded(raw *rawGeometry, g rawGeometryDecoder) (Geometry, error) {

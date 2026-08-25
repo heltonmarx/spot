@@ -1,8 +1,5 @@
 package spot
 
-import (
-	"encoding/json"
-)
 
 // GeometryCollection is a collection of other geometry objects.
 type GeometryCollection struct {
@@ -24,16 +21,10 @@ func (m *GeometryCollection) isGeometry()     {}
 
 // UnmarshalJSON decodes a GeoJSON geometry collection into m, decoding each
 // member geometry according to its own "type".
-func (m *GeometryCollection) UnmarshalJSON(data []byte) error {
-	raw := &rawGeometry{}
-	if err := json.Unmarshal(data, raw); err != nil {
-		return err
-	}
-	return m.decode(raw)
-}
+func (m *GeometryCollection) UnmarshalJSON(data []byte) error { return unmarshalGeometry(data, m) }
 
 func (m *GeometryCollection) decode(raw *rawGeometry) error {
-	m.Type = raw.Type
+	m.Type = TypeGeometryCollection
 	m.Geometries = make([]Geometry, 0, len(raw.Geometries))
 	for i := range raw.Geometries {
 		geom, err := decodeGeometry(&raw.Geometries[i])

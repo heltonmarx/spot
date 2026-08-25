@@ -25,15 +25,9 @@ func (m *Point) GeoType() string { return TypePoint }
 func (m *Point) isGeometry()     {}
 
 // UnmarshalJSON decodes a GeoJSON point into m.
-func (m *Point) UnmarshalJSON(data []byte) error {
-	raw := &rawGeometry{}
-	if err := json.Unmarshal(data, raw); err != nil {
-		return err
-	}
-	return m.decode(raw)
-}
+func (m *Point) UnmarshalJSON(data []byte) error { return unmarshalGeometry(data, m) }
 
 func (m *Point) decode(raw *rawGeometry) error {
-	m.Type = raw.Type
+	m.Type = TypePoint
 	return json.Unmarshal(raw.Coordinates, &m.Coordinates)
 }

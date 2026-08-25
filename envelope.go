@@ -26,15 +26,9 @@ func (m *Envelope) GeoType() string { return TypeEnvelope }
 func (m *Envelope) isGeometry()     {}
 
 // UnmarshalJSON decodes an envelope geometry into m.
-func (m *Envelope) UnmarshalJSON(data []byte) error {
-	raw := &rawGeometry{}
-	if err := json.Unmarshal(data, raw); err != nil {
-		return err
-	}
-	return m.decode(raw)
-}
+func (m *Envelope) UnmarshalJSON(data []byte) error { return unmarshalGeometry(data, m) }
 
 func (m *Envelope) decode(raw *rawGeometry) error {
-	m.Type = raw.Type
+	m.Type = TypeEnvelope
 	return json.Unmarshal(raw.Coordinates, &m.Coordinates)
 }

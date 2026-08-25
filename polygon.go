@@ -23,15 +23,9 @@ func (m *Polygon) GeoType() string { return TypePolygon }
 func (m *Polygon) isGeometry()     {}
 
 // UnmarshalJSON decodes a GeoJSON polygon into m.
-func (m *Polygon) UnmarshalJSON(data []byte) error {
-	raw := &rawGeometry{}
-	if err := json.Unmarshal(data, raw); err != nil {
-		return err
-	}
-	return m.decode(raw)
-}
+func (m *Polygon) UnmarshalJSON(data []byte) error { return unmarshalGeometry(data, m) }
 
 func (m *Polygon) decode(raw *rawGeometry) error {
-	m.Type = raw.Type
+	m.Type = TypePolygon
 	return json.Unmarshal(raw.Coordinates, &m.Coordinates)
 }

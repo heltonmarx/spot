@@ -170,6 +170,33 @@ circle := spot.NewShape(spot.WithCircle("5km", []float64{-73.98, 40.76}))
 discriminated `MarshalJSON`/`UnmarshalJSON`, so a heterogeneous `Shape` can be
 round-tripped without knowing its concrete type.
 
+## Compatibility
+
+`spot` uses lowercase type names (`"point"`, `"polygon"`) as required by
+Elasticsearch. Other GeoJSON consumers follow RFC 7946, which uses PascalCase
+(`"Point"`, `"Polygon"`). Use the `RFC7946` wrapper for those systems.
+
+```go
+// Elasticsearch / OpenSearch (default, lowercase)
+shapeBytes, _ := json.Marshal(shape)
+
+// MongoDB, PostGIS, Solr, and any RFC 7946 consumer (PascalCase)
+shapeBytes, _ := json.Marshal(spot.RFC7946(shape))
+```
+
+`RFC7946` recurses into `GeometryCollection` members automatically. `Envelope`
+and `Circle` are Elasticsearch extensions with no RFC 7946 equivalent; their
+type names are left unchanged by the wrapper.
+
+| Consumer | Type name format | How to marshal |
+|---|---|---|
+| Elasticsearch | lowercase | `json.Marshal(shape)` |
+| OpenSearch | lowercase | `json.Marshal(shape)` |
+| CrateDB | lowercase | `json.Marshal(shape)` |
+| MongoDB | PascalCase (RFC 7946) | `json.Marshal(spot.RFC7946(shape))` |
+| PostgreSQL + PostGIS | PascalCase (RFC 7946) | `json.Marshal(spot.RFC7946(shape))` |
+| Solr | PascalCase (RFC 7946) | `json.Marshal(spot.RFC7946(shape))` |
+
 ## Tests
 
 ```sh

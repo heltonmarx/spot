@@ -25,15 +25,9 @@ func (m *LineString) GeoType() string { return TypeLineString }
 func (m *LineString) isGeometry()     {}
 
 // UnmarshalJSON decodes a GeoJSON linestring into m.
-func (m *LineString) UnmarshalJSON(data []byte) error {
-	raw := &rawGeometry{}
-	if err := json.Unmarshal(data, raw); err != nil {
-		return err
-	}
-	return m.decode(raw)
-}
+func (m *LineString) UnmarshalJSON(data []byte) error { return unmarshalGeometry(data, m) }
 
 func (m *LineString) decode(raw *rawGeometry) error {
-	m.Type = raw.Type
+	m.Type = TypeLineString
 	return json.Unmarshal(raw.Coordinates, &m.Coordinates)
 }

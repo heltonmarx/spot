@@ -34,16 +34,10 @@ func (m *Circle) GeoType() string { return TypeCircle }
 func (m *Circle) isGeometry()     {}
 
 // UnmarshalJSON decodes a circle geometry into m.
-func (m *Circle) UnmarshalJSON(data []byte) error {
-	raw := &rawGeometry{}
-	if err := json.Unmarshal(data, raw); err != nil {
-		return err
-	}
-	return m.decode(raw)
-}
+func (m *Circle) UnmarshalJSON(data []byte) error { return unmarshalGeometry(data, m) }
 
 func (m *Circle) decode(raw *rawGeometry) error {
-	m.Type = raw.Type
+	m.Type = TypeCircle
 	m.Radius = raw.Radius
 	return json.Unmarshal(raw.Coordinates, &m.Coordinates)
 }

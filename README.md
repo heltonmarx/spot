@@ -2,9 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/heltonmarx/spot.svg)](https://pkg.go.dev/github.com/heltonmarx/spot)
 
-RFC7946 GeoJSON geometry types for Go, with Elasticsearch geo-shape support,
-extracted from the author's [GeoShape Query implementation][pr] for
-`olivere/elastic` and repackaged as a standalone, client-agnostic module.
+RFC7946 GeoJSON geometry types for Go, with Elasticsearch geo-shape support.
 
 This module models all nine geometry types as first-class Go structs with
 typed marshal/unmarshal: `Point`, `MultiPoint`, `LineString`, `MultiLineString`,
@@ -18,8 +16,6 @@ All types implement the `Geometry` interface (`GeoType() string`), so a
 > specifies PascalCase (`"Point"`, `"Polygon"`).
 
 This module has **no runtime dependency** on any Elasticsearch client.
-
-[pr]: https://github.com/olivere/elastic/pull/1058
 
 ## Install
 
@@ -203,8 +199,6 @@ type names are left unchanged by the wrapper.
 go test ./...
 ```
 
-## Origin & license
+## License
 
-The geometry types are derived from the author's [GeoShape Query contribution][pr]
-to `olivere/elastic` (PR #1058). Original code Copyright (c) Oliver Eilhard;
-packaging Copyright (c) Helton Marques. Both are released under the MIT License.
+Copyright (c) Helton Marques. Released under the MIT License.

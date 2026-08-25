@@ -1,6 +1,5 @@
 package spot
 
-
 // GeometryCollection is a collection of other geometry objects.
 type GeometryCollection struct {
 	Type       string     `json:"type"`

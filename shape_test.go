@@ -45,53 +45,59 @@ func TestShapeUnmarshalDispatchesToConcreteField(t *testing.T) {
 		check    func(t *testing.T, s *Shape)
 	}{
 		{
-			name:     "multipoint",
+			name:     TypeMultiPoint,
 			raw:      `{"type":"multipoint","coordinates":[[1,2],[3,4]]}`,
 			typeName: TypeMultiPoint,
 			check: func(t *testing.T, s *Shape) {
+				t.Helper()
 				assert.True(t, s.IsMultiPoint())
 				assert.Equal(t, [][]float64{{1, 2}, {3, 4}}, s.MultiPoint.Coordinates)
 			},
 		},
 		{
-			name:     "multilinestring",
+			name:     TypeMultiLineString,
 			raw:      `{"type":"multilinestring","coordinates":[[[1,2],[3,4]]]}`,
 			typeName: TypeMultiLineString,
 			check: func(t *testing.T, s *Shape) {
+				t.Helper()
 				assert.True(t, s.IsMultiLineString())
 			},
 		},
 		{
-			name:     "multipolygon",
+			name:     TypeMultiPolygon,
 			raw:      `{"type":"multipolygon","coordinates":[[[[0,0],[1,0],[1,1],[0,0]]]]}`,
 			typeName: TypeMultiPolygon,
 			check: func(t *testing.T, s *Shape) {
+				t.Helper()
 				assert.True(t, s.IsMultiPolygon())
 			},
 		},
 		{
-			name:     "geometrycollection",
+			name:     TypeGeometryCollection,
 			raw:      `{"type":"geometrycollection","geometries":[{"type":"point","coordinates":[1,2]}]}`,
 			typeName: TypeGeometryCollection,
 			check: func(t *testing.T, s *Shape) {
+				t.Helper()
 				assert.True(t, s.IsGeometryCollection())
 				is := assert.New(t)
 				is.Len(s.GeometryCollection.Geometries, 1)
 			},
 		},
 		{
-			name:     "envelope",
+			name:     TypeEnvelope,
 			raw:      `{"type":"envelope","coordinates":[[100,1],[101,0]]}`,
 			typeName: TypeEnvelope,
 			check: func(t *testing.T, s *Shape) {
+				t.Helper()
 				assert.True(t, s.IsEnvelope())
 			},
 		},
 		{
-			name:     "circle",
+			name:     TypeCircle,
 			raw:      `{"type":"circle","radius":"25m","coordinates":[-109.87,44.43]}`,
 			typeName: TypeCircle,
 			check: func(t *testing.T, s *Shape) {
+				t.Helper()
 				assert.True(t, s.IsCircle())
 				assert.Equal(t, "25m", s.Circle.Radius)
 			},
@@ -158,32 +164,32 @@ func TestShapeMarshalRoundTripForAllTypes(t *testing.T) {
 		expected string
 	}{
 		{
-			name:     "multipoint",
+			name:     TypeMultiPoint,
 			shape:    NewShape(WithMultiPoint([][]float64{{1, 2}, {3, 4}})),
 			expected: `{"type":"multipoint","coordinates":[[1,2],[3,4]]}`,
 		},
 		{
-			name:     "multilinestring",
+			name:     TypeMultiLineString,
 			shape:    NewShape(WithMultiLineString([][][]float64{{{1, 2}, {3, 4}}})),
 			expected: `{"type":"multilinestring","coordinates":[[[1,2],[3,4]]]}`,
 		},
 		{
-			name:     "multipolygon",
+			name:     TypeMultiPolygon,
 			shape:    NewShape(WithMultiPolygon([][][][]float64{{{{0, 0}, {1, 0}, {1, 1}, {0, 0}}}})),
 			expected: `{"type":"multipolygon","coordinates":[[[[0,0],[1,0],[1,1],[0,0]]]]}`,
 		},
 		{
-			name:     "geometrycollection",
+			name:     TypeGeometryCollection,
 			shape:    NewShape(WithGeometryCollection([]Geometry{NewPoint([]float64{1, 2})})),
 			expected: `{"type":"geometrycollection","geometries":[{"type":"point","coordinates":[1,2]}]}`,
 		},
 		{
-			name:     "envelope",
+			name:     TypeEnvelope,
 			shape:    NewShape(WithEnvelope([][]float64{{100, 1}, {101, 0}})),
 			expected: `{"type":"envelope","coordinates":[[100,1],[101,0]]}`,
 		},
 		{
-			name:     "circle",
+			name:     TypeCircle,
 			shape:    NewShape(WithCircle("25m", []float64{-109.87, 44.43})),
 			expected: `{"type":"circle","radius":"25m","coordinates":[-109.87,44.43]}`,
 		},

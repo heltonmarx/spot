@@ -14,13 +14,13 @@ func TestRFC7946AllStandardTypes(t *testing.T) {
 		geometry Geometry
 		wantType string
 	}{
-		{"point", NewPoint([]float64{1, 2}), "Point"},
-		{"multipoint", NewMultiPoint([][]float64{{1, 2}, {3, 4}}), "MultiPoint"},
-		{"linestring", NewLineString([][]float64{{1, 2}, {3, 4}}), "LineString"},
-		{"multilinestring", NewMultiLineString([][][]float64{{{1, 2}, {3, 4}}}), "MultiLineString"},
-		{"polygon", NewPolygon([][][]float64{{{0, 0}, {1, 0}, {1, 1}, {0, 0}}}), "Polygon"},
-		{"multipolygon", NewMultiPolygon([][][][]float64{{{{0, 0}, {1, 0}, {1, 1}, {0, 0}}}}), "MultiPolygon"},
-		{"geometrycollection", NewGeometryCollection([]Geometry{}), "GeometryCollection"},
+		{TypePoint, NewPoint([]float64{1, 2}), "Point"},
+		{TypeMultiPoint, NewMultiPoint([][]float64{{1, 2}, {3, 4}}), "MultiPoint"},
+		{TypeLineString, NewLineString([][]float64{{1, 2}, {3, 4}}), "LineString"},
+		{TypeMultiLineString, NewMultiLineString([][][]float64{{{1, 2}, {3, 4}}}), "MultiLineString"},
+		{TypePolygon, NewPolygon([][][]float64{{{0, 0}, {1, 0}, {1, 1}, {0, 0}}}), "Polygon"},
+		{TypeMultiPolygon, NewMultiPolygon([][][][]float64{{{{0, 0}, {1, 0}, {1, 1}, {0, 0}}}}), "MultiPolygon"},
+		{TypeGeometryCollection, NewGeometryCollection([]Geometry{}), "GeometryCollection"},
 	}
 
 	for _, tt := range tests {

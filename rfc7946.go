@@ -47,7 +47,7 @@ func (r RFC7946Geometry) MarshalJSON() ([]byte, error) {
 			wrapped[i] = RFC7946(g)
 		}
 		return json.Marshal(struct {
-			Type       json.RawMessage  `json:"type"`
+			Type       json.RawMessage   `json:"type"`
 			Geometries []RFC7946Geometry `json:"geometries"`
 		}{Type: pascalRaw, Geometries: wrapped})
 	}
